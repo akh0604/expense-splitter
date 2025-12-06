@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Expense Splitter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+    }
+
+    body {
+      background: #0f172a;
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      background: #f9fafb;
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      color: white;
+      padding: 18px 18px 14px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    main {
+      padding: 16px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1.2fr 1.8fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.07);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+
+    .card small {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    form {
+      margin-top: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      color: #374151;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 8px 9px;
+      border-radius: 9px;
+      border: 1px solid #d1d5db;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
+      background: #f9fafb;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+      background: #ffffff;
+    }
+
+    button {
+      border: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .pill-positive {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill-negative {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .pill-neutral {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .participants-list,
+    .expenses-list {
+      margin-top: 8px;
+      max-height: 190px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .participants-list div,
+    .expenses-list div {
+      padding: 7px 6px;
+      border-radius: 9px;
+      font-size: 0.8rem;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      background: #f9fafb;
+    }
+
+    .participants-list span.name {
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .participants-list span.meta {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .expenses-list strong {
+      display: block;
+      font-size: 0.8rem;
+      color: #111827;
+    }
+
+    .expenses-list span {
+      font-size: 0.74rem;
+      color: #6b7280;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.8rem;
+    }
+
+    .summary-table th,
+    .summary-table td {
+      padding: 6px 4px;
+      text-align: left;
+    }
+
+    .summary-table th {
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 600;
+      color: #4b5563;
+    }
+
+    .summary-table tr:nth-child(even) {
+      background: #f3f4f6;
+    }
+
+    .no-data {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .top-row span {
+      font-size: 0.78rem;
+      color: #6b7280;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 500;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Simple Expense Splitter</h1>
+      <p>Track shared expenses with friends and see who should pay or receive 💸</p>
+    </header>
+
+    <main>
+      <div class="grid grid-2">
+        <!-- Left: Participants & Expenses -->
+        <div class="grid" style="gap: 12px">
+          <section class="card">
+            <div class="top-row">
+              <div>
+                <h2>Participants</h2>
+                <small>Add friends / roommates</small>
+              </div>
+              <span class="tag">Step 1</span>
+            </div>
+
+            <form id="participantForm">
+              <label for="participantName">Name</label>
+              <input
+                id="participantName"
+                type="text"
+                placeholder="e.g. Raj"
+                required
+              />
+              <button type="submit" class="btn-primary">+ Add Participant</button>
+            </form>
+
+            <div class="participants-list" id="participantsList"></div>
+            <p class="no-data" id="noParticipantsMsg">
+              No participants yet. Add at least 2 people.
+            </p>
+          </section>
+
+          <section class="card">
+            <div class="top-row">
+              <div>
+                <h2>Add Expense</h2>
+                <small>Split equally among all participants</small>
+              </div>
+              <span class="tag">Step 2</span>
+            </div>
+
+            <form id="expenseForm">
+              <label for="expenseDescription">Description</label>
+              <input
+                id="expenseDescription"
+                type="text"
+                placeholder="e.g. Dinner, Uber, Groceries"
+                required
+              />
+
+              <label for="expenseAmount">Amount (₹)</label>
+              <input
+                id="expenseAmount"
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="e.g. 500"
+                required
+              />
+
+              <label for="paidBy">Paid by</label>
+              <select id="paidBy" required>
+                <!-- options filled by JS -->
+              </select>
+
+              <button type="submit" class="btn-primary">
+                + Add Expense
+              </button>
+            </form>
+
+            <div class="expenses-list" id="expensesList"></div>
+            <p class="no-data" id="noExpensesMsg">
+              No expenses added yet. Add one to see the split.
+            </p>
+          </section>
+        </div>
+
+        <!-- Right: Summary -->
+        <section class="card">
+          <div class="top-row">
+            <div>
+              <h2>Summary & Balances</h2>
+              <small>Positive = should receive, Negative = should pay</small>
+            </div>
+            <button id="resetBtn" class="btn-secondary" type="button">
+              Reset All
+            </button>
+          </div>
+
+          <table class="summary-table" id="summaryTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Total Paid (₹)</th>
+                <th>Share (₹)</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody">
+              <!-- rows filled by JS -->
+            </tbody>
+          </table>
+          <p class="no-data" id="noSummaryMsg">
+            Add participants and expenses to see the summary.
+          </p>
+
+          <div class="footer-note">
+            Data is stored only in this browser using localStorage.
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ---- Data Model ----
+    let participants = [];
+    let expenses = [];
+
+    const STORAGE_KEYS = {
+      participants: "expenseSplitter_participants",
+      expenses: "expenseSplitter_expenses",
+    };
+
+    // ---- DOM Elements ----
+    const participantForm = document.getElementById("participantForm");
+    const expenseForm = document.getElementById("expenseForm");
+
+    const participantNameInput = document.getElementById("participantName");
+    const participantsList = document.getElementById("participantsList");
+    const noParticipantsMsg = document.getElementById("noParticipantsMsg");
+
+    const expenseDescriptionInput =
+      document.getElementById("expenseDescription");
+    const expenseAmountInput = document.getElementById("expenseAmount");
+    const paidBySelect = document.getElementById("paidBy");
+    const expensesList = document.getElementById("expensesList");
+    const noExpensesMsg = document.getElementById("noExpensesMsg");
+
+    const summaryBody = document.getElementById("summaryBody");
+    const noSummaryMsg = document.getElementById("noSummaryMsg");
+    const resetBtn = document.getElementById("resetBtn");
+
+    // ---- Local Storage Helpers ----
+    function saveData() {
+      localStorage.setItem(
+        STORAGE_KEYS.participants,
+        JSON.stringify(participants)
+      );
+      localStorage.setItem(STORAGE_KEYS.expenses, JSON.stringify(expenses));
+    }
+
+    function loadData() {
+      const storedParticipants = localStorage.getItem(
+        STORAGE_KEYS.participants
+      );
+      const storedExpenses = localStorage.getItem(STORAGE_KEYS.expenses);
+
+      if (storedParticipants) {
+        participants = JSON.parse(storedParticipants);
+      }
+      if (storedExpenses) {
+        expenses = JSON.parse(storedExpenses);
+      }
+    }
+
+    // ---- Rendering Functions ----
+    function renderParticipants() {
+      participantsList.innerHTML = "";
+
+      if (participants.length === 0) {
+        noParticipantsMsg.style.display = "block";
+      } else {
+        noParticipantsMsg.style.display = "none";
+      }
+
+      participants.forEach((p) => {
+        const div = document.createElement("div");
+
+        const left = document.createElement("div");
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "name";
+        nameSpan.textContent = p.name;
+
+        const metaSpan = document.createElement("span");
+        metaSpan.className = "meta";
+        const personExpenses = expenses.filter((e) => e.paidBy === p.id);
+        const totalPaid = personExpenses.reduce(
+          (sum, e) => sum + e.amount,
+          0
+        );
+        metaSpan.textContent = `Paid so far: ₹${totalPaid.toFixed(2)}`;
+
+        left.appendChild(nameSpan);
+        left.appendChild(document.createElement("br"));
+        left.appendChild(metaSpan);
+
+        div.appendChild(left);
+        participantsList.appendChild(div);
+      });
+
+      // Also update Paid By dropdown
+      renderPaidByOptions();
+    }
+
+    function renderPaidByOptions() {
+      paidBySelect.innerHTML = "";
+
+      if (participants.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Add participants first";
+        paidBySelect.appendChild(opt);
+        paidBySelect.disabled = true;
+        return;
+      }
+
+      paidBySelect.disabled = false;
+      participants.forEach((p, index) => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.name;
+        if (index === 0) opt.selected = true;
+        paidBySelect.appendChild(opt);
+      });
+    }
+
+    function renderExpenses() {
+      expensesList.innerHTML = "";
+
+      if (expenses.length === 0) {
+        noExpensesMsg.style.display = "block";
+      } else {
+        noExpensesMsg.style.display = "none";
+      }
+
+      expenses.forEach((e) => {
+        const div = document.createElement("div");
+
+        const left = document.createElement("div");
+        const strong = document.createElement("strong");
+        strong.textContent = `${e.description} – ₹${e.amount.toFixed(2)}`;
+
+        const span = document.createElement("span");
+        const payer = participants.find((p) => p.id === e.paidBy);
+        const payerName = payer ? payer.name : "Unknown";
+        span.textContent = `Paid by ${payerName}, split between ${participants.length} people`;
+
+        left.appendChild(strong);
+        left.appendChild(span);
+
+        div.appendChild(left);
+        expensesList.appendChild(div);
+      });
+    }
+
+    function renderSummary() {
+      summaryBody.innerHTML = "";
+
+      if (participants.length === 0 || expenses.length === 0) {
+        noSummaryMsg.style.display = "block";
+        return;
+      } else {
+        noSummaryMsg.style.display = "none";
+      }
+
+      const n = participants.length;
+
+      // Calculate totals
+      const balances = participants.map((p) => {
+        const personExpenses = expenses.filter((e) => e.paidBy === p.id);
+        const totalPaid = personExpenses.reduce(
+          (sum, e) => sum + e.amount,
+          0
+        );
+
+        // Share = sum of (expense.amount / n) for all expenses, since split equally
+        const share = expenses.reduce((sum, e) => sum + e.amount / n, 0);
+
+        const balance = totalPaid - share; // +ve => should receive, -ve => should pay
+
+        return { ...p, totalPaid, share, balance };
+      });
+
+      balances.forEach((b) => {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = b.name;
+
+        const tdPaid = document.createElement("td");
+        tdPaid.textContent = `₹${b.totalPaid.toFixed(2)}`;
+
+        const tdShare = document.createElement("td");
+        tdShare.textContent = `₹${b.share.toFixed(2)}`;
+
+        const tdBalance = document.createElement("td");
+        const span = document.createElement("span");
+
+        if (Math.abs(b.balance) < 0.01) {
+          span.textContent = "Settled";
+          span.className = "pill pill-neutral";
+        } else if (b.balance > 0) {
+          span.textContent = `+₹${b.balance.toFixed(2)} (Receive)`;
+          span.className = "pill pill-positive";
+        } else {
+          span.textContent = `-₹${Math.abs(b.balance).toFixed(2)} (Pay)`;
+          span.className = "pill pill-negative";
+        }
+
+        tdBalance.appendChild(span);
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdPaid);
+        tr.appendChild(tdShare);
+        tr.appendChild(tdBalance);
+        summaryBody.appendChild(tr);
+      });
+    }
+
+    function renderAll() {
+      renderParticipants();
+      renderExpenses();
+      renderSummary();
+    }
+
+    // ---- Event Listeners ----
+    participantForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = participantNameInput.value.trim();
+      if (!name) return;
+
+      const newParticipant = {
+        id: Date.now().toString(),
+        name,
+      };
+      participants.push(newParticipant);
+
+      participantNameInput.value = "";
+      saveData();
+      renderAll();
+    });
+
+    expenseForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      if (participants.length === 0) {
+        alert("Please add at least one participant first.");
+        return;
+      }
+
+      const description = expenseDescriptionInput.value.trim();
+      const amount = parseFloat(expenseAmountInput.value);
+      const paidBy = paidBySelect.value;
+
+      if (!description || isNaN(amount) || amount <= 0 || !paidBy) {
+        alert("Please enter valid expense details.");
+        return;
+      }
+
+      const newExpense = {
+        id: Date.now().toString(),
+        description,
+        amount,
+        paidBy,
+      };
+
+      expenses.push(newExpense);
+
+      expenseDescriptionInput.value = "";
+      expenseAmountInput.value = "";
+      saveData();
+      renderAll();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      const confirmReset = confirm(
+        "This will clear all participants and expenses. Continue?"
+      );
+      if (!confirmReset) return;
+
+      participants = [];
+      expenses = [];
+      saveData();
+      renderAll();
+    });
+
+    // ---- Init ----
+    loadData();
+    renderAll();
+  </script>
+</body>
+</html>
